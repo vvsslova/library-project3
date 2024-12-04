@@ -3,6 +3,7 @@ package com.github.vvsslova.libraryrest.services;
 import com.github.vvsslova.libraryrest.entity.Book;
 import com.github.vvsslova.libraryrest.entity.Person;
 import com.github.vvsslova.libraryrest.repositories.PersonRepository;
+import com.github.vvsslova.libraryrest.util.personErrors.PersonNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class PersonService {
 
     public Person findOne(int id) {
         Optional<Person> foundPerson = personRepository.findById(id);
-        return foundPerson.orElse(null);
+        return foundPerson.orElseThrow(PersonNotFoundException::new);
     }
 
     @Transactional

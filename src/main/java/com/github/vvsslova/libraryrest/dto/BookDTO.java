@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BookDTO {
 
+    private int id;
+
     @NotEmpty(message = "Title should not be empty!")
     @Size(min = 5, max = 70, message = "Title should be between 2 and 40 characters!")
     private String title;

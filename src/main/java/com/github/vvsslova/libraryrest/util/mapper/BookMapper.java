@@ -1,8 +1,8 @@
 package com.github.vvsslova.libraryrest.util.mapper;
 
-
 import com.github.vvsslova.libraryrest.dto.BookDTO;
 import com.github.vvsslova.libraryrest.entity.Book;
+import com.github.vvsslova.libraryrest.util.hashing.IDHashing;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +15,20 @@ public class BookMapper {
     }
 
     public BookDTO convertToBookDTO(Book book) {
-        return modelMapper.map(book, BookDTO.class);
+        BookDTO bookDTO = modelMapper.map(book, BookDTO.class);
+        if (bookDTO.getId() == 0) {
+            return bookDTO;
+        }
+        bookDTO.setId(IDHashing.toHashedId(book.getId()));
+        return bookDTO;
     }
 
     public Book convertToBook(BookDTO bookDTO) {
-        return modelMapper.map(bookDTO, Book.class);
+        Book book = modelMapper.map(bookDTO, Book.class);
+        if (book.getId() == 0) {
+            return book;
+        }
+        book.setId(IDHashing.toOriginalId(bookDTO.getId()));
+        return book;
     }
 }

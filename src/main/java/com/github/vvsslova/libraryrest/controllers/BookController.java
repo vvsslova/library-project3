@@ -7,6 +7,7 @@ import com.github.vvsslova.libraryrest.services.BookService;
 import com.github.vvsslova.libraryrest.services.LibraryService;
 import com.github.vvsslova.libraryrest.util.bookErrors.BookNotFoundException;
 import com.github.vvsslova.libraryrest.util.bookErrors.BookNotSavedException;
+import com.github.vvsslova.libraryrest.util.hashing.IDHashing;
 import com.github.vvsslova.libraryrest.util.mapper.BookMapper;
 import com.github.vvsslova.libraryrest.util.mapper.PersonMapper;
 import com.github.vvsslova.libraryrest.util.personErrors.PersonNotFoundException;
@@ -58,12 +59,12 @@ public class BookController {
 
     @GetMapping("/{id}")
     public BookDTO showBook(@PathVariable("id") int id) {
-        return bookMapper.convertToBookDTO(bookService.findOne(id));
+        return bookMapper.convertToBookDTO(bookService.findOne(IDHashing.toOriginalId(id)));
     }
 
     @GetMapping("/{id}/person")
     public PersonDTO showPerson(@PathVariable("id") int id) {
-        if (libraryService.getLentPerson(id) == null) {
+        if (libraryService.getLentPerson(IDHashing.toOriginalId(id)) == null) {
             throw new PersonNotFoundException();
         }
         return personMapper.convertToPersonDTO(libraryService.getLentPerson(id));
@@ -72,7 +73,7 @@ public class BookController {
     @GetMapping("/{id}/delayResult")
     public boolean getDelayResult(@PathVariable("id") int id) {
         long today = new Date().getTime();
-        Book book = bookService.findOne(id);
+        Book book = bookService.findOne(IDHashing.toOriginalId(id));
         if (book.getLendDate() != null) {
             book.setDelayCheckResult(today - book.getLendDate().getTime() >= 864000000);
         }
@@ -94,30 +95,30 @@ public class BookController {
         if (bindingResult.hasErrors()) {
             getBindingResult(bindingResult);
         }
-        bookService.update(id, bookMapper.convertToBook(book));
+        bookService.update(IDHashing.toOriginalId(id), bookMapper.convertToBook(book));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") int id) {
         try {
-            bookService.findOne(id);
+            bookService.findOne(IDHashing.toOriginalId(id));
         } catch (BookNotFoundException e) {
             throw new BookNotFoundException();
         }
-        bookService.delete(id);
+        bookService.delete(IDHashing.toOriginalId(id));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PutMapping("/{id}/returnBook")
     public ResponseEntity<HttpStatus> returnBook(@PathVariable("id") int id) {
-        libraryService.returnBook(id);
+        libraryService.returnBook(IDHashing.toOriginalId(id));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PutMapping("/{bookID}/lend/{personID}")
     public ResponseEntity<HttpStatus> lendBook(@PathVariable("bookID") int bookID, @PathVariable("personID") int personID) {
-        libraryService.lendBook(bookID, personID);
+        libraryService.lendBook(IDHashing.toOriginalId(bookID), IDHashing.toOriginalId(personID));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 

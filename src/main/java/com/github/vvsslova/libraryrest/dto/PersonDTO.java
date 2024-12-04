@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class PersonDTO {
 
+    private int id;
+
     @NotEmpty(message = "Name should not be empty!")
     @Size(min = 5, max = 70, message = "Name should be between 2 and 60 characters!")
     @Pattern(regexp = "^[А-Я][а-я]+\\s[А-Я][а-я]+\\s[А-Я][а-я]+$",

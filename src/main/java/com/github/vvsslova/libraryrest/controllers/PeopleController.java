@@ -4,6 +4,7 @@ import com.github.vvsslova.libraryrest.dto.BookDTO;
 import com.github.vvsslova.libraryrest.dto.PersonDTO;
 import com.github.vvsslova.libraryrest.services.LibraryService;
 import com.github.vvsslova.libraryrest.services.PersonService;
+import com.github.vvsslova.libraryrest.util.hashing.IDHashing;
 import com.github.vvsslova.libraryrest.util.mapper.BookMapper;
 import com.github.vvsslova.libraryrest.util.mapper.PersonMapper;
 import com.github.vvsslova.libraryrest.util.personErrors.PersonNotFoundException;
@@ -42,12 +43,12 @@ public class PeopleController {
 
     @GetMapping("/{id}")
     public PersonDTO showPerson(@PathVariable("id") int id) {
-        return personMapper.convertToPersonDTO(personService.findOne(id));
+        return personMapper.convertToPersonDTO(personService.findOne(IDHashing.toOriginalId(id)));
     }
 
     @GetMapping("/{id}/books")
     public List<BookDTO> showPersonsBooks(@PathVariable("id") int id) {
-        return libraryService.lentBooks(personService.findOne(id)).stream().map(bookMapper::convertToBookDTO).toList();
+        return libraryService.lentBooks(personService.findOne(IDHashing.toOriginalId(id))).stream().map(bookMapper::convertToBookDTO).toList();
     }
 
     @PostMapping("/people")
@@ -65,18 +66,18 @@ public class PeopleController {
         if (bindingResult.hasErrors()) {
             getBindingResult(bindingResult);
         }
-        personService.update(id, personMapper.convertToPerson(person));
+        personService.update(IDHashing.toOriginalId(id), personMapper.convertToPerson(person));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") int id) {
         try {
-            personService.findOne(id);
+            personService.findOne(IDHashing.toOriginalId(id));
         } catch (PersonNotFoundException e) {
             throw new PersonNotFoundException();
         }
-        personService.delete(id);
+        personService.delete(IDHashing.toOriginalId(id));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
