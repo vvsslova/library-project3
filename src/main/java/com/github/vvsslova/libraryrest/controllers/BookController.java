@@ -67,7 +67,7 @@ public class BookController {
         if (libraryService.getLentPerson(IDHashing.toOriginalId(id)) == null) {
             throw new PersonNotFoundException();
         }
-        return personMapper.convertToPersonDTO(libraryService.getLentPerson(id));
+        return personMapper.convertToPersonDTO(libraryService.getLentPerson(IDHashing.toOriginalId(id)));
     }
 
     @GetMapping("/{id}/delayResult")
