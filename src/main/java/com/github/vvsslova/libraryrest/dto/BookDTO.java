@@ -3,13 +3,15 @@ package com.github.vvsslova.libraryrest.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.springframework.stereotype.Component;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @NoArgsConstructor
 @Getter
 @Setter
-@Component
+@AllArgsConstructor
 public class BookDTO {
 
     private int id;
@@ -24,10 +26,4 @@ public class BookDTO {
 
     @Max(value = 2024, message = "Year of publication should not be grater than 2024!")
     private int yearOfPublication;
-
-    public BookDTO(String title, String author, int yearOfPublication) {
-        this.title = title;
-        this.author = author;
-        this.yearOfPublication = yearOfPublication;
-    }
 }

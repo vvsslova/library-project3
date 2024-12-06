@@ -1,4 +1,4 @@
-package com.github.vvsslova.libraryrest.util.mapper;
+package com.github.vvsslova.libraryrest.mapper.person;
 
 import com.github.vvsslova.libraryrest.dto.PersonDTO;
 import com.github.vvsslova.libraryrest.entity.Person;
@@ -19,7 +19,7 @@ public class PersonMapper {
         if (person.getId() == 0) {
             return personDTO;
         }
-        personDTO.setId(IDHashing.toHashedId(person.getId()));
+        personDTO.setId(IDHashing.hashingId(person.getId()));
         return personDTO;
     }
 
@@ -28,7 +28,7 @@ public class PersonMapper {
         if (personDTO.getId() == 0) {
             return person;
         }
-        person.setId(IDHashing.toOriginalId(personDTO.getId()));
+        person.setId(IDHashing.hashingId(personDTO.getId()));
         return person;
     }
 }

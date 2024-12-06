@@ -1,10 +1,15 @@
 package com.github.vvsslova.libraryrest.services;
 
-import com.github.vvsslova.libraryrest.entity.Book;
+import com.github.vvsslova.libraryrest.dto.PersonDTO;
 import com.github.vvsslova.libraryrest.entity.Person;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotDeletedException;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotFoundException;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotSavedException;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotUpdatedException;
+import com.github.vvsslova.libraryrest.mapper.person.PersonMapper;
 import com.github.vvsslova.libraryrest.repositories.PersonRepository;
-import com.github.vvsslova.libraryrest.util.personErrors.PersonNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.github.vvsslova.libraryrest.util.hashing.IDHashing;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,44 +17,48 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 @Transactional(readOnly = true)
 public class PersonService {
     private final PersonRepository personRepository;
     private final LibraryService libraryService;
+    private final PersonMapper personMapper;
 
-    @Autowired
-    public PersonService(PersonRepository personRepository, LibraryService libraryService) {
-        this.personRepository = personRepository;
-        this.libraryService = libraryService;
+    public List<PersonDTO> findAll() {
+        return personRepository.findAll().stream().map(personMapper::convertToPersonDTO).toList();
     }
 
-    public List<Person> findAll() {
-        return personRepository.findAll();
-    }
-
-    public Person findOne(int id) {
-        Optional<Person> foundPerson = personRepository.findById(id);
-        return foundPerson.orElseThrow(PersonNotFoundException::new);
+    public PersonDTO findPerson(int id) {
+        Optional<Person> foundPerson = personRepository.findById(IDHashing.hashingId(id));
+        return foundPerson.map(personMapper::convertToPersonDTO).orElseThrow(() -> new EntityNotFoundException("Person not found"));
     }
 
     @Transactional
-    public void save(Person person) {
-        personRepository.save(person);
+    public void save(PersonDTO person) {
+        try {
+            personRepository.save(personMapper.convertToPerson(person));
+        } catch (Exception e) {
+            throw new EntityNotSavedException("Person not saved");
+        }
     }
 
     @Transactional
-    public void update(int id, Person updatedPerson) {
-        updatedPerson.setId(id);
-        personRepository.save(updatedPerson);
+    public void update(int id, PersonDTO updatedPerson) {
+        try {
+            updatedPerson.setId(IDHashing.hashingId(id));
+            personRepository.save(personMapper.convertToPerson(updatedPerson));
+        } catch (Exception e) {
+            throw new EntityNotUpdatedException("Person not updated");
+        }
     }
 
     @Transactional
     public void delete(int id) {
-        List<Book> books = libraryService.lentBooks(findOne(id));
-        for (Book book : books) {
-            book.setLentPerson(null);
-            book.setLendDate(null);
+        try {
+            libraryService.setNullPerson(IDHashing.hashingId(id));
+            personRepository.deleteById(IDHashing.hashingId(id));
+        } catch (Exception e) {
+            throw new EntityNotDeletedException("Person not deleted");
         }
-        personRepository.deleteById(id);
     }
 }

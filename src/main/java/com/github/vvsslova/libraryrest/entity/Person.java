@@ -1,7 +1,17 @@
 package com.github.vvsslova.libraryrest.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,9 +43,4 @@ public class Person {
 
     @OneToMany(mappedBy = "lentPerson")
     private List<Book> lentBooks;
-
-    public Person(String name, int yearOfBirth) {
-        this.name = name;
-        this.yearOfBirth = yearOfBirth;
-    }
 }

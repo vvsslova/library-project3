@@ -1,93 +1,73 @@
 package com.github.vvsslova.libraryrest.controllers;
 
-import com.github.vvsslova.libraryrest.dto.BookDTO;
 import com.github.vvsslova.libraryrest.dto.PersonDTO;
 import com.github.vvsslova.libraryrest.services.LibraryService;
+import com.github.vvsslova.libraryrest.services.MessageService;
 import com.github.vvsslova.libraryrest.services.PersonService;
-import com.github.vvsslova.libraryrest.util.hashing.IDHashing;
-import com.github.vvsslova.libraryrest.util.mapper.BookMapper;
-import com.github.vvsslova.libraryrest.util.mapper.PersonMapper;
-import com.github.vvsslova.libraryrest.util.personErrors.PersonNotFoundException;
-import com.github.vvsslova.libraryrest.util.personErrors.PersonNotSavedException;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/people")
 public class PeopleController {
     private final PersonService personService;
     private final LibraryService libraryService;
-    private final PersonMapper personMapper;
-    private final BookMapper bookMapper;
-
-    @Autowired
-    public PeopleController(PersonService personService, LibraryService libraryService, PersonMapper personMapper, BookMapper bookMapper) {
-        this.personService = personService;
-        this.libraryService = libraryService;
-        this.personMapper = personMapper;
-        this.bookMapper = bookMapper;
-    }
+    private final MessageService messageService;
 
     @GetMapping()
     public List<PersonDTO> getAllPeople() {
-        return personService.findAll().stream().map(personMapper::convertToPersonDTO).toList();
+        return personService.findAll();
     }
 
     @GetMapping("/{id}")
     public PersonDTO showPerson(@PathVariable("id") int id) {
-        return personMapper.convertToPersonDTO(personService.findOne(IDHashing.toOriginalId(id)));
+        return personService.findPerson(id);
     }
 
-    @GetMapping("/{id}/books")
-    public List<BookDTO> showPersonsBooks(@PathVariable("id") int id) {
-        return libraryService.lentBooks(personService.findOne(IDHashing.toOriginalId(id))).stream().map(bookMapper::convertToBookDTO).toList();
-    }
-
-    @PostMapping("/people")
-    public ResponseEntity<HttpStatus> create(@RequestBody @Valid PersonDTO person, BindingResult bindingResult) {
+    @PostMapping()
+    public ResponseEntity<PersonDTO> create(@RequestBody @Valid PersonDTO person, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            getBindingResult(bindingResult);
+            messageService.getBindingResult(bindingResult);
         }
-        personService.save(personMapper.convertToPerson(person));
-        return ResponseEntity.ok(HttpStatus.OK);
+        personService.save(person);
+        return new ResponseEntity<>(person, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonDTO person, BindingResult bindingResult,
-                                             @PathVariable("id") int id) {
+    public ResponseEntity<PersonDTO> update(@RequestBody @Valid PersonDTO person, BindingResult bindingResult,
+                                            @PathVariable("id") int id) {
         if (bindingResult.hasErrors()) {
-            getBindingResult(bindingResult);
+            messageService.getBindingResult(bindingResult);
         }
-        personService.update(IDHashing.toOriginalId(id), personMapper.convertToPerson(person));
-        return ResponseEntity.ok(HttpStatus.OK);
+        personService.update(id, person);
+        return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") int id) {
-        try {
-            personService.findOne(IDHashing.toOriginalId(id));
-        } catch (PersonNotFoundException e) {
-            throw new PersonNotFoundException();
-        }
-        personService.delete(IDHashing.toOriginalId(id));
+        personService.delete(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    private void getBindingResult(BindingResult bindingResult) {
-        StringBuilder msg = new StringBuilder();
-        List<FieldError> errors = bindingResult.getFieldErrors();
-        for (FieldError error : errors) {
-            msg.append(error.getField()).append("-").append(error.getDefaultMessage()).append(";");
-        }
-        throw new PersonNotSavedException(msg.toString());
+    // people/book_id
+    @GetMapping("/get_person")
+    public PersonDTO getPersonByBookID(@RequestParam(value = "book_id", required = false) int book_id) {
+        return libraryService.getLentPerson(book_id);
     }
 }
 

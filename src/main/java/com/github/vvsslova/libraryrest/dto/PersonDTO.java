@@ -1,16 +1,18 @@
 package com.github.vvsslova.libraryrest.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
 
 @NoArgsConstructor
 @Getter
 @Setter
-@Component
 @AllArgsConstructor
 public class PersonDTO {
 

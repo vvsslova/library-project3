@@ -1,4 +1,4 @@
-package com.github.vvsslova.libraryrest.util.mapper;
+package com.github.vvsslova.libraryrest.mapper.book;
 
 import com.github.vvsslova.libraryrest.dto.BookDTO;
 import com.github.vvsslova.libraryrest.entity.Book;
@@ -19,7 +19,7 @@ public class BookMapper {
         if (bookDTO.getId() == 0) {
             return bookDTO;
         }
-        bookDTO.setId(IDHashing.toHashedId(book.getId()));
+        bookDTO.setId(IDHashing.hashingId(book.getId()));
         return bookDTO;
     }
 
@@ -28,7 +28,7 @@ public class BookMapper {
         if (book.getId() == 0) {
             return book;
         }
-        book.setId(IDHashing.toOriginalId(bookDTO.getId()));
+        book.setId(IDHashing.hashingId(bookDTO.getId()));
         return book;
     }
 }
