@@ -55,16 +55,18 @@ public class BookService {
     }
 
     @Transactional
-    public void save(BookDTO book) {
+    public BookDTO save(BookDTO book) {
         try {
-            bookRepository.save(bookMapper.convertToBook(book));
+            Book convertedBook = bookMapper.convertToBook(book);
+            bookRepository.save(convertedBook);
+            return bookMapper.convertToBookDTO(convertedBook);
         } catch (Exception e) {
             throw new EntityNotSavedException("Book not saved");
         }
     }
 
     @Transactional
-    public void update(int id, BookDTO book) {
+    public BookDTO update(int id, BookDTO book) {
         try {
             Optional<Book> oldBook = bookRepository.findById(IDHashing.hashingId(id));
             if (oldBook.isEmpty()) {
@@ -75,6 +77,7 @@ public class BookService {
             updatedBook.setLentPerson(oldBook.get().getLentPerson());
             updatedBook.setLendDate(oldBook.get().getLendDate());
             bookRepository.save(updatedBook);
+            return bookMapper.convertToBookDTO(updatedBook);
         } catch (Exception e) {
             throw new EntityNotUpdatedException("Book not updated");
         }

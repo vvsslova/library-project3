@@ -52,8 +52,8 @@ public class BookController {
         if (bindingResult.hasErrors()) {
             throw new EntityNotSavedException(messageService.getBindingResult(bindingResult));
         }
-        bookService.save(book);
-        return new ResponseEntity<>(book, HttpStatus.CREATED);
+        BookDTO savedBook = bookService.save(book);
+        return new ResponseEntity<>(savedBook, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -62,8 +62,8 @@ public class BookController {
         if (bindingResult.hasErrors()) {
             throw new EntityNotUpdatedException(messageService.getBindingResult(bindingResult));
         }
-        bookService.update(id, book);
-        return new ResponseEntity<>(book, HttpStatus.OK);
+        BookDTO updatedBook = bookService.update(id, book);
+        return new ResponseEntity<>(updatedBook, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

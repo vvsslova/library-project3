@@ -1,6 +1,8 @@
 package com.github.vvsslova.libraryrest.exception.library;
 
-public class BookNotLentException extends RuntimeException {
+import com.github.vvsslova.libraryrest.exception.BadRequestException;
+
+public class BookNotLentException extends BadRequestException {
     public BookNotLentException(String message) {
         super(message);
     }

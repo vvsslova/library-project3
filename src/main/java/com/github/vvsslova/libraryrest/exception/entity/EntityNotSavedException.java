@@ -1,6 +1,8 @@
 package com.github.vvsslova.libraryrest.exception.entity;
 
-public class EntityNotSavedException extends RuntimeException {
+import com.github.vvsslova.libraryrest.exception.BadRequestException;
+
+public class EntityNotSavedException extends BadRequestException {
   public EntityNotSavedException(String message) {
     super(message);
   }

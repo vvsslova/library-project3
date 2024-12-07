@@ -41,17 +41,21 @@ public class PersonService {
     @Transactional
     public PersonDTO save(PersonDTO person) {
         try {
-            return personMapper.convertToPersonDTO(personRepository.save(personMapper.convertToPerson(person)));
+            Person convertedPerson = personMapper.convertToPerson(person);
+            personRepository.save(convertedPerson);
+            return personMapper.convertToPersonDTO(convertedPerson);
         } catch (Exception e) {
             throw new EntityNotSavedException("Person not saved");
         }
     }
 
     @Transactional
-    public void update(int id, PersonDTO updatedPerson) {
+    public PersonDTO update(int id, PersonDTO updatedPerson) {
         try {
             updatedPerson.setId(IDHashing.hashingId(id));
-            personRepository.save(personMapper.convertToPerson(updatedPerson));
+            Person convertedPerson = personMapper.convertToPerson(updatedPerson);
+            personRepository.save(convertedPerson);
+            return personMapper.convertToPersonDTO(convertedPerson);
         } catch (Exception e) {
             throw new EntityNotUpdatedException("Person not updated");
         }

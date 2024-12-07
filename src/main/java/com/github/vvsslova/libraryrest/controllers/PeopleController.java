@@ -45,7 +45,8 @@ public class PeopleController {
         if (bindingResult.hasErrors()) {
             throw new EntityNotSavedException(messageService.getBindingResult(bindingResult));
         }
-        return new ResponseEntity<>(personService.save(person), HttpStatus.CREATED);
+        PersonDTO savedPerson = personService.save(person);
+        return new ResponseEntity<>(savedPerson, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -54,8 +55,8 @@ public class PeopleController {
         if (bindingResult.hasErrors()) {
             throw new EntityNotUpdatedException(messageService.getBindingResult(bindingResult));
         }
-        personService.update(id, person);
-        return new ResponseEntity<>(person, HttpStatus.OK);
+        PersonDTO updatedPerson = personService.update(id, person);
+        return new ResponseEntity<>(updatedPerson, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
