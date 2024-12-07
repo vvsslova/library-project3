@@ -1,6 +1,9 @@
 package com.github.vvsslova.libraryrest.controllers;
 
+import com.github.vvsslova.libraryrest.controllers.filter.BookFilter;
 import com.github.vvsslova.libraryrest.dto.BookDTO;
+import com.github.vvsslova.libraryrest.dto.LendBookDTO;
+import com.github.vvsslova.libraryrest.dto.ReturnBookDTO;
 import com.github.vvsslova.libraryrest.exception.entity.EntityNotSavedException;
 import com.github.vvsslova.libraryrest.exception.entity.EntityNotUpdatedException;
 import com.github.vvsslova.libraryrest.services.BookService;
@@ -72,15 +75,15 @@ public class BookController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/{id}/return")
-    public ResponseEntity<HttpStatus> returnBook(@PathVariable("id") int id) {
-        libraryService.returnBook(id);
+    @PutMapping("/return")
+    public ResponseEntity<HttpStatus> returnBook(@RequestBody ReturnBookDTO bookDTO) {
+        libraryService.returnBook(bookDTO.getBookId());
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/lend/{person_id}/{book_id}")
-    public ResponseEntity<HttpStatus> lendBook(@PathVariable("person_id") int person_id, @PathVariable("book_id") int book_id) {
-        libraryService.lendBook(book_id, person_id);
+    @PutMapping("/lend")
+    public ResponseEntity<HttpStatus> lendBook(@RequestBody LendBookDTO bookDTO) {
+        libraryService.lendBook(bookDTO.getBookId(), bookDTO.getUserId());
         return ResponseEntity.ok(HttpStatus.OK);
     }
 

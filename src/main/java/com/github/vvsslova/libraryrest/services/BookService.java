@@ -1,6 +1,6 @@
 package com.github.vvsslova.libraryrest.services;
 
-import com.github.vvsslova.libraryrest.controllers.BookFilter;
+import com.github.vvsslova.libraryrest.controllers.filter.BookFilter;
 import com.github.vvsslova.libraryrest.dto.BookDTO;
 import com.github.vvsslova.libraryrest.entity.Book;
 import com.github.vvsslova.libraryrest.exception.entity.EntityNotDeletedException;

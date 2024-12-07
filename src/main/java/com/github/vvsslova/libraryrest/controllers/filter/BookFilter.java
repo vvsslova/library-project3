@@ -1,4 +1,4 @@
-package com.github.vvsslova.libraryrest.controllers;
+package com.github.vvsslova.libraryrest.controllers.filter;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,4 +16,3 @@ public class BookFilter {
         this.size = 10;
     }
 }
-
