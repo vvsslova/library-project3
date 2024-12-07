@@ -1,6 +1,8 @@
 package com.github.vvsslova.libraryrest.controllers;
 
 import com.github.vvsslova.libraryrest.dto.PersonDTO;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotSavedException;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotUpdatedException;
 import com.github.vvsslova.libraryrest.services.LibraryService;
 import com.github.vvsslova.libraryrest.services.MessageService;
 import com.github.vvsslova.libraryrest.services.PersonService;
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -42,17 +43,16 @@ public class PeopleController {
     @PostMapping()
     public ResponseEntity<PersonDTO> create(@RequestBody @Valid PersonDTO person, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            messageService.getBindingResult(bindingResult);
+            throw new EntityNotSavedException(messageService.getBindingResult(bindingResult));
         }
-        personService.save(person);
-        return new ResponseEntity<>(person, HttpStatus.CREATED);
+        return new ResponseEntity<>(personService.save(person), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PersonDTO> update(@RequestBody @Valid PersonDTO person, BindingResult bindingResult,
                                             @PathVariable("id") int id) {
         if (bindingResult.hasErrors()) {
-            messageService.getBindingResult(bindingResult);
+            throw new EntityNotUpdatedException(messageService.getBindingResult(bindingResult));
         }
         personService.update(id, person);
         return new ResponseEntity<>(person, HttpStatus.OK);
@@ -64,9 +64,8 @@ public class PeopleController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    // people/book_id
-    @GetMapping("/get_person")
-    public PersonDTO getPersonByBookID(@RequestParam(value = "book_id", required = false) int book_id) {
+    @GetMapping("/{book_id}")
+    public PersonDTO getPersonByBookID(@PathVariable int book_id) {
         return libraryService.getLentPerson(book_id);
     }
 }

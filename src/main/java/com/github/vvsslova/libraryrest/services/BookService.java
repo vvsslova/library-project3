@@ -1,5 +1,6 @@
 package com.github.vvsslova.libraryrest.services;
 
+import com.github.vvsslova.libraryrest.controllers.BookFilter;
 import com.github.vvsslova.libraryrest.dto.BookDTO;
 import com.github.vvsslova.libraryrest.entity.Book;
 import com.github.vvsslova.libraryrest.exception.entity.EntityNotDeletedException;
@@ -10,8 +11,7 @@ import com.github.vvsslova.libraryrest.mapper.book.BookMapper;
 import com.github.vvsslova.libraryrest.repositories.BookRepository;
 import com.github.vvsslova.libraryrest.util.hashing.IDHashing;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -28,23 +28,24 @@ import java.util.stream.Collectors;
 public class BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private final BookFilter bookFilter;
 
-    public List<BookDTO> findAll() {
-        return bookRepository.findAll().stream().map(bookMapper::convertToBookDTO).toList();
-    }
-
-    public List<BookDTO> findAll(Sort sortCriterion) {
-        return bookRepository.findAll(sortCriterion).stream().map(bookMapper::convertToBookDTO).toList();
-    }
-
-    public Page<BookDTO> findAll(Pageable pageVariables) {
-        Page<Book> bookPage = bookRepository.findAll(pageVariables);
-        List<BookDTO> bookDTOList = bookPage
-                .getContent()
-                .stream()
-                .map(bookMapper::convertToBookDTO)
-                .collect(Collectors.toList());
-        return new PageImpl<>(bookDTOList, pageVariables, bookPage.getTotalElements());
+    public List<BookDTO> findAll(BookFilter filter) {
+        Pageable pageable = PageRequest.of(filter.getPage(), filter.getSize());
+        if (filter.getSortBy() != null) {
+            pageable = PageRequest.of(filter.getPage(), filter.getSize(), Sort.by(filter.getSortBy()));
+        }
+        if (filter.getTitleStartsWith() != null) {
+            return bookRepository.findByTitleStartingWith(filter.getTitleStartsWith(), pageable)
+                    .stream()
+                    .map(bookMapper::convertToBookDTO)
+                    .collect(Collectors.toList());
+        } else {
+            return bookRepository.findAll(pageable).getContent()
+                    .stream()
+                    .map(bookMapper::convertToBookDTO)
+                    .collect(Collectors.toList());
+        }
     }
 
     public BookDTO findBook(int id) {
@@ -54,7 +55,6 @@ public class BookService {
                 .orElseThrow(() -> new EntityNotFoundException("Book not found"));
     }
 
-    // TODO
     @Transactional
     public void save(BookDTO book) {
         try {
@@ -88,14 +88,6 @@ public class BookService {
         } catch (Exception e) {
             throw new EntityNotDeletedException("Book not deleted");
         }
-    }
-
-    public List<BookDTO> searchBook(String title) {
-        return bookRepository
-                .findByTitleStartingWith(title)
-                .stream()
-                .map(bookMapper::convertToBookDTO)
-                .toList();
     }
 
     public boolean getDelayResult(int bookId) {

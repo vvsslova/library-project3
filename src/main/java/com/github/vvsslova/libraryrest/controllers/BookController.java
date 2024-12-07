@@ -1,13 +1,13 @@
 package com.github.vvsslova.libraryrest.controllers;
 
 import com.github.vvsslova.libraryrest.dto.BookDTO;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotSavedException;
+import com.github.vvsslova.libraryrest.exception.entity.EntityNotUpdatedException;
 import com.github.vvsslova.libraryrest.services.BookService;
 import com.github.vvsslova.libraryrest.services.LibraryService;
 import com.github.vvsslova.libraryrest.services.MessageService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -33,17 +32,9 @@ public class BookController {
     private final MessageService messageService;
 
     @GetMapping()
-    public List<BookDTO> getAllBooks(@RequestParam(value = "Sort.by", required = false) String sort,
-                                     @RequestParam(value = "page", required = false) Integer page,
-                                     @RequestParam(value = "itemsPerPage", required = false) Integer itemsPerPage) {
-        if (sort == null & page != null & itemsPerPage != null) {
-            return bookService.findAll(PageRequest.of(page, itemsPerPage)).getContent();
-        } else if (sort != null & page == null & itemsPerPage == null) {
-            return bookService.findAll(Sort.by(sort));
-        } else if (sort != null & page != null & itemsPerPage != null) {
-            return bookService.findAll(PageRequest.of(page, itemsPerPage, Sort.by(sort))).getContent();
-        }
-        return bookService.findAll();
+    public ResponseEntity<List<BookDTO>> getAllBooks(BookFilter bookFilter) {
+        List<BookDTO> books = bookService.findAll(bookFilter);
+        return ResponseEntity.ok(books);
     }
 
     @GetMapping("/{id}")
@@ -59,7 +50,7 @@ public class BookController {
     @PostMapping()
     public ResponseEntity<BookDTO> create(@RequestBody @Valid BookDTO book, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            messageService.getBindingResult(bindingResult);
+            throw new EntityNotSavedException(messageService.getBindingResult(bindingResult));
         }
         bookService.save(book);
         return new ResponseEntity<>(book, HttpStatus.CREATED);
@@ -69,7 +60,7 @@ public class BookController {
     public ResponseEntity<BookDTO> update(@RequestBody @Valid BookDTO book,
                                           BindingResult bindingResult, @PathVariable("id") int id) {
         if (bindingResult.hasErrors()) {
-            messageService.getBindingResult(bindingResult);
+            throw new EntityNotUpdatedException(messageService.getBindingResult(bindingResult));
         }
         bookService.update(id, book);
         return new ResponseEntity<>(book, HttpStatus.OK);
@@ -87,20 +78,14 @@ public class BookController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PutMapping("/lend")
-    public ResponseEntity<HttpStatus> lendBook(@RequestParam(value = "person_id", required = false) Integer person_id,
-                                               @RequestParam(value = "book_id", required = false) Integer book_id) {
+    @PutMapping("/lend/{person_id}/{book_id}")
+    public ResponseEntity<HttpStatus> lendBook(@PathVariable("person_id") int person_id, @PathVariable("book_id") int book_id) {
         libraryService.lendBook(book_id, person_id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PostMapping("/searchBook")
-    public List<BookDTO> searchBook(@RequestParam(value = "title", required = false) String title) {
-        return bookService.searchBook(title);
-    }
-
-    @GetMapping("/books")
-    public List<BookDTO> showPersonsBooks(@RequestParam(value = "person_id", required = false) int person_id) {
+    @GetMapping("/{person_id}")
+    public List<BookDTO> showPersonsBooks(@PathVariable int person_id) {
         return libraryService.lentBooks(person_id);
     }
 }

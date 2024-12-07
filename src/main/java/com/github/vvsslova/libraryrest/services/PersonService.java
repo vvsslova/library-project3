@@ -25,18 +25,23 @@ public class PersonService {
     private final PersonMapper personMapper;
 
     public List<PersonDTO> findAll() {
-        return personRepository.findAll().stream().map(personMapper::convertToPersonDTO).toList();
+        return personRepository.findAll()
+                .stream()
+                .map(personMapper::convertToPersonDTO)
+                .toList();
     }
 
     public PersonDTO findPerson(int id) {
         Optional<Person> foundPerson = personRepository.findById(IDHashing.hashingId(id));
-        return foundPerson.map(personMapper::convertToPersonDTO).orElseThrow(() -> new EntityNotFoundException("Person not found"));
+        return foundPerson
+                .map(personMapper::convertToPersonDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Person not found"));
     }
 
     @Transactional
-    public void save(PersonDTO person) {
+    public PersonDTO save(PersonDTO person) {
         try {
-            personRepository.save(personMapper.convertToPerson(person));
+            return personMapper.convertToPersonDTO(personRepository.save(personMapper.convertToPerson(person)));
         } catch (Exception e) {
             throw new EntityNotSavedException("Person not saved");
         }
