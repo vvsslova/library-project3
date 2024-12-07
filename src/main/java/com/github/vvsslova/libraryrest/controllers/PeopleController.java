@@ -55,6 +55,7 @@ public class PeopleController {
         if (bindingResult.hasErrors()) {
             throw new EntityNotUpdatedException(messageService.getBindingResult(bindingResult));
         }
+        personService.update(id, person);
         PersonDTO updatedPerson = personService.update(id, person);
         return new ResponseEntity<>(updatedPerson, HttpStatus.OK);
     }

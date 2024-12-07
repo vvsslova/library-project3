@@ -52,8 +52,8 @@ public class PersonService {
     @Transactional
     public PersonDTO update(int id, PersonDTO updatedPerson) {
         try {
-            updatedPerson.setId(IDHashing.hashingId(id));
             Person convertedPerson = personMapper.convertToPerson(updatedPerson);
+            convertedPerson.setId(IDHashing.hashingId(id));
             personRepository.save(convertedPerson);
             return personMapper.convertToPersonDTO(convertedPerson);
         } catch (Exception e) {
