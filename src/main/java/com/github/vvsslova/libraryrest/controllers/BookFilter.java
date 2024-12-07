@@ -2,9 +2,7 @@ package com.github.vvsslova.libraryrest.controllers;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
 
-@Component
 @Getter
 @Setter
 public class BookFilter {

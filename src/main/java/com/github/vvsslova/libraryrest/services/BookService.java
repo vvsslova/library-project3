@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 public class BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
-    private final BookFilter bookFilter;
 
     public List<BookDTO> findAll(BookFilter filter) {
         Pageable pageable = PageRequest.of(filter.getPage(), filter.getSize());
